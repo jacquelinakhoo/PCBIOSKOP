@@ -24,33 +24,41 @@
 
               <a href="/admin/movies/add" class="btn btn-primary mb-3">Add Movie</a>
 
-              <table class="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Movie ID</th>
-                    <th>Title</th>
-                    <th>Duration</th>
-                    <th>Status</th>
-                    <th>Poster</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php foreach($movies as $m) { ?>
+              <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                  <thead>
                     <tr>
-                      <td><?= $m->MovieID ?></td>
-                      <td><?= $m->Title ?></td>
-                      <td><?= $m->Duration ?> Mins</td>
-                      <td><?= $m->MovieStatus ?></td>
-                      <td><img src="{{ asset('assets/img/'.$m->Poster) }}" width="80" alt="Poster"></td>
-                      <td>
-                        <a href="/admin/movies/edit/<?= $m->MovieID ?>" class="btn btn-sm btn-warning">Edit</a>
-                        <a href="/admin/movies/delete/<?= $m->MovieID ?>" class="btn btn-sm btn-danger">Delete</a>
-                      </td>
+                      <th>No.</th>
+                      <th>Title</th>
+                      <th>Synopsis</th>
+                      <th>Duration</th>
+                      <th>Status</th>
+                      <th>Poster</th>
+                      <th>Action</th>
                     </tr>
-                  <?php } ?>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    <!-- Added the $no = 1 counter here -->
+                    <?php $no = 1; foreach($movies as $m) { ?>
+                      <tr>
+                        <td><?= $no++ ?></td> <!-- Prints 1, 2, 3... -->
+                        <td><?= $m->Title ?></td>
+                        <td style="min-width: 200px;"><?= $m->Synopsis ?></td>
+                        <td><?= $m->Duration ?> Mins</td>
+                        <td><?= $m->MovieStatus ?></td>
+                        <td>
+                            <!-- Changed width from 80 to 120 to make it wider -->
+                            <img src="{{ asset('assets/img/'.$m->Poster) }}" width="120" class="img-fluid rounded" alt="Poster">
+                        </td>
+                        <td>
+                          <a href="/admin/movies/edit/<?= $m->MovieID ?>" class="btn btn-sm btn-warning mb-1">Edit</a>
+                          <a href="/admin/movies/delete/<?= $m->MovieID ?>" class="btn btn-sm btn-danger mb-1">Delete</a>
+                        </td>
+                      </tr>
+                    <?php } ?>
+                  </tbody>
+                </table>
+              </div>
 
             </div>
           </div>

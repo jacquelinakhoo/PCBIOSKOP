@@ -31,4 +31,19 @@ class DataQuery extends Model
     {
         return DB::table($tableName)->where($columnName, $id)->delete();
     }
+
+    
+    public function getSchedules()
+    {
+        return DB::table('schedules')
+                 ->join('movies', 'schedules.MovieID', '=', 'movies.MovieID')
+                 ->join('studios', 'schedules.StudioID', '=', 'studios.StudioID')
+                 ->select('schedules.*', 'movies.Title', 'studios.StudioName')
+                 ->get();
+    }
+
+    public function insertGetID($tableName, $data)
+    {
+        return DB::table($tableName)->insertGetId($data);
+    }
 }
