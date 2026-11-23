@@ -52,5 +52,12 @@ class DataQuery extends Model
         return DB::table($tableName)->where($conditions)->get();
     }
 
-    
+        public function getSchedulesByMovie($movieId)
+    {
+        return DB::table('schedules')
+                 ->join('studios', 'schedules.StudioID', '=', 'studios.StudioID')
+                 ->where('schedules.MovieID', $movieId)
+                 ->select('schedules.*', 'studios.StudioName')
+                 ->get();
+    }
 }

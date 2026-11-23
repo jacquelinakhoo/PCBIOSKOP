@@ -47,3 +47,9 @@ Route::get('/admin/staff', [CinemaController::class, 'adminStaff']);
 Route::get('/admin/staff/add', [CinemaController::class, 'addStaff']);
 Route::post('/admin/staff/add', [CinemaController::class, 'processAddStaff']);
 Route::get('/admin/staff/delete/{id}', [CinemaController::class, 'deleteStaff']);
+
+// Movie Detail & Booking Flow
+Route::get('/movie/detail/{id}', [CinemaController::class, 'movieDetail']);
+Route::get('/movie/select-seats/{scheduleId}', [CinemaController::class, 'selectSeats']);
+Route::post('/movie/book', [CinemaController::class, 'processBooking']);
+Route::get('/movie/ticket/{orderId}', [CinemaController::class, 'viewTicket']);

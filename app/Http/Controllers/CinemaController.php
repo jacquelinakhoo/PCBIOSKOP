@@ -432,4 +432,104 @@ class CinemaController extends Controller
         
         return redirect()->intended('/admin/schedules')->with('success', 'Schedule deleted successfully!');
     }
+
+        // ================= MOVIE BOOKING FLOW =================
+
+    public function movieDetail($id)
+    {
+        if (!session('Username')) { return redirect('/'); }
+        
+        $query = new DataQuery;
+        $data['movie'] = $query->getWhere('movies', ['MovieID' => $id]);
+        $data['schedules'] = $query->getSchedulesByMovie($id);
+        
+        return view('moviedetail', $data); 
+    }
+
+    public function selectSeats($scheduleId)
+    {
+        if (!session('Username')) { return redirect('/'); }
+        
+        $query = new DataQuery;
+        $data['schedule'] = $query->getWhere('schedules', ['ScheduleID' => $scheduleId]);
+        
+        // We need the movie title too
+        $data['movie'] = $query->getWhere('movies', ['MovieID' => $data['schedule']->MovieID]);
+        
+        // Get all seats for this schedule
+        $data['seats'] = $query->getAllWhere('seats', ['ScheduleID' => $scheduleId]);
+        
+        return view('selectseats', $data);
+    }
+
+    public function processBooking(Request $request)
+    {
+        if (!session('Username')) { return redirect('/'); }
+
+        $request->validate([
+            'ScheduleID' => 'required',
+            'selected_seats' => 'required' // This will be an array of SeatsID
+        ]);
+
+        $scheduleId = $request->input('ScheduleID');
+        $selectedSeats = $request->input('selected_seats'); // Array of seat IDs
+        $userId = session('UserID');
+
+        $query = new DataQuery;
+
+        // 1. Get schedule to calculate total price
+        $schedule = $query->getWhere('schedules', ['ScheduleID' => $scheduleId]);
+        $totalPrice = count($selectedSeats) * $schedule->Price;
+
+        // 2. Generate a random Ticket Code for the QR (e.g., TKT-A1B2C3)
+        $ticketCode = 'TKT-' . strtoupper(substr(md5(uniqid()), 0, 6));
+
+        // 3. Insert the Order
+        $orderData = array(
+            'UserID' => $userId,
+            'ScheduleID' => $scheduleId,
+            'TotalPrice' => $totalPrice,
+            'OrderStatus' => 'Pending',
+            'OrderDate' => date('Y-m-d'),
+            'PaymentMethod' => 'QRIS',
+            'TicketCode' => $ticketCode
+        );
+        
+        $orderId = $query->insertGetID('orders', $orderData);
+
+        // 4. Loop through the selected seats
+        foreach ($selectedSeats as $seatId) {
+            // Insert into OrderDetails
+            $detailData = array(
+                'OrderID' => $orderId,
+                'SeatsID' => $seatId,
+                'TicketPrice' => $schedule->Price
+            );
+            $query->insert('orderdetails', $detailData);
+
+            // Update Seat Status to Booked
+            $query->updateRecord('seats', ['SeatsID' => $seatId], ['SeatStatus' => 'Booked']);
+        }
+
+        return redirect()->intended('/movie/ticket/' . $orderId)->with('success', 'Ticket booked successfully!');
+    }
+
+    public function viewTicket($orderId)
+    {
+        if (!session('Username')) { return redirect('/'); }
+        
+        $query = new DataQuery;
+        $data['order'] = $query->getWhere('orders', ['OrderID' => $orderId]);
+        $data['schedule'] = $query->getWhere('schedules', ['ScheduleID' => $data['order']->ScheduleID]);
+        $data['movie'] = $query->getWhere('movies', ['MovieID' => $data['schedule']->MovieID]);
+        
+        // Get the seats for this order using a manual join
+        $data['details'] = DB::table('orderdetails')
+                             ->join('seats', 'orderdetails.SeatsID', '=', 'seats.SeatsID')
+                             ->where('orderdetails.OrderID', $orderId)
+                             ->select('seats.SeatNumber', 'orderdetails.TicketPrice')
+                             ->get();
+
+        return view('viewticket', $data);
+    }
 }
