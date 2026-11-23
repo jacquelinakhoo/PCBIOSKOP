@@ -78,24 +78,33 @@ class CinemaController extends Controller
         return redirect()->intended('/');
     }
 
-    // ================= DASHBOARDS =================
+        // ================= DASHBOARDS =================
 
     public function dashboardAdmin() 
     { 
-        if (!session('Username')) { return redirect('/'); }
-        return view('dashboardadmin'); 
+        if (session('Role') != 'admin') { return redirect('/'); }
+        
+        $query = new DataQuery;
+        $data['movies'] = $query->getAllWhere('movies', ['MovieStatus' => 'Now Showing']);
+        return view('dashboard', $data); // Point to the single view
     }
 
     public function dashboardStaff() 
     { 
-        if (!session('Username')) { return redirect('/'); }
-        return view('dashboardstaff'); 
+        if (session('Role') != 'staff') { return redirect('/'); }
+        
+        $query = new DataQuery;
+        $data['movies'] = $query->getAllWhere('movies', ['MovieStatus' => 'Now Showing']);
+        return view('dashboard', $data); // Point to the single view
     }
 
     public function dashboardCustomer() 
     { 
-        if (!session('Username')) { return redirect('/'); }
-        return view('dashboardcustomer'); 
+        if (session('Role') != 'customer') { return redirect('/'); }
+        
+        $query = new DataQuery;
+        $data['movies'] = $query->getAllWhere('movies', ['MovieStatus' => 'Now Showing']);
+        return view('dashboard', $data); // Point to the single view
     }
 
     // ================= ADMIN MOVIES =================
@@ -330,6 +339,55 @@ class CinemaController extends Controller
         }
 
         return redirect()->intended('/admin/schedules')->with('success', 'Schedule added and seats generated successfully!');
+    }
+
+        // ================= ADMIN STAFF =================
+
+    public function adminStaff()
+    {
+        if (session('Role') != 'admin') { return redirect('/'); }
+        
+        $query = new DataQuery;
+        // Get only users where Role is 'staff'
+        $data['staffs'] = $query->getAllWhere('users', ['Role' => 'staff']); 
+        return view('adminstaff', $data);
+    }
+
+    public function addStaff()
+    {
+        if (session('Role') != 'admin') { return redirect('/'); }
+        return view('addstaff');
+    }
+
+    public function processAddStaff(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'EmailUser' => 'required|unique:users,email',
+            'Password' => 'required'
+        ]);
+
+        $dataUser = array(
+            'name' => $request->input('name'),
+            'email' => $request->input('EmailUser'),
+            'password' => $request->input('Password'), 
+            'Role' => 'staff' // <--- Hardcoded to staff!
+        );
+
+        $query = new DataQuery;
+        $query->insert('users', $dataUser);
+
+        return redirect()->intended('/admin/staff')->with('success', 'Staff account created successfully!');
+    }
+
+    public function deleteStaff($id)
+    {
+        if (session('Role') != 'admin') { return redirect('/'); }
+        
+        $query = new DataQuery;
+        $query->deleteRecord('users', 'id', $id); // users table uses 'id', not 'UserID'
+        
+        return redirect()->intended('/admin/staff')->with('success', 'Staff account deleted successfully!');
     }
 
     public function editSchedule($id)

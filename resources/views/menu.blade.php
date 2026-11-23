@@ -15,7 +15,7 @@
         </a>
       </li>
 
-      <!-- ADMIN ONLY MENU -->
+            <!-- ADMIN ONLY MENU -->
       <?php if(session('Role') == 'admin') { ?>
       <li class="nav-heading">Admin Master</li>
       <li class="nav-item">
@@ -34,6 +34,13 @@
         <a class="nav-link collapsed" href="/admin/schedules">
           <i class="bi bi-calendar-event"></i>
           <span>Data Schedules</span>
+        </a>
+      </li>
+      <!-- NEW MENU FOR STAFF -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="/admin/staff">
+          <i class="bi bi-person-badge"></i>
+          <span>Data Staff</span>
         </a>
       </li>
       <?php } ?>

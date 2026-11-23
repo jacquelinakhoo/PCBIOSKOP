@@ -46,4 +46,11 @@ class DataQuery extends Model
     {
         return DB::table($tableName)->insertGetId($data);
     }
+
+    public function getAllWhere($tableName, $conditions)
+    {
+        return DB::table($tableName)->where($conditions)->get();
+    }
+
+    
 }

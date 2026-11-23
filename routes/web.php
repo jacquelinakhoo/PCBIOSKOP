@@ -15,6 +15,9 @@ Route::get('/dashboard/admin', [CinemaController::class, 'dashboardAdmin']);
 Route::get('/dashboard/staff', [CinemaController::class, 'dashboardStaff']);
 Route::get('/dashboard/customer', [CinemaController::class, 'dashboardCustomer']);
 
+// Customer/All Roles Movie View
+Route::get('/movie/detail/{id}', [CinemaController::class, 'movieDetail']);
+
 // Admin Movies
 Route::get('/admin/movies', [CinemaController::class, 'adminMovies']);
 Route::get('/admin/movies/add', [CinemaController::class, 'addMovie']); 
@@ -38,3 +41,9 @@ Route::post('/admin/schedules/add', [CinemaController::class, 'processAddSchedul
 Route::get('/admin/schedules/edit/{id}', [CinemaController::class, 'editSchedule']);
 Route::post('/admin/schedules/edit/{id}', [CinemaController::class, 'processEditSchedule']);
 Route::get('/admin/schedules/delete/{id}', [CinemaController::class, 'deleteSchedule']);
+
+// Admin Staff
+Route::get('/admin/staff', [CinemaController::class, 'adminStaff']);
+Route::get('/admin/staff/add', [CinemaController::class, 'addStaff']);
+Route::post('/admin/staff/add', [CinemaController::class, 'processAddStaff']);
+Route::get('/admin/staff/delete/{id}', [CinemaController::class, 'deleteStaff']);
