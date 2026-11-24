@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DataQuery;
+use Illuminate\Support\Facades\DB;
 
 class CinemaController extends Controller
 {
@@ -371,7 +372,7 @@ class CinemaController extends Controller
             'name' => $request->input('name'),
             'email' => $request->input('EmailUser'),
             'password' => $request->input('Password'), 
-            'Role' => 'staff' // <--- Hardcoded to staff!
+            'Role' => 'staff' 
         );
 
         $query = new DataQuery;
@@ -435,17 +436,33 @@ class CinemaController extends Controller
 
         // ================= MOVIE BOOKING FLOW =================
 
-    public function movieDetail($id)
+    public function movieDetail(Request $request, $id)
     {
         if (!session('Username')) { return redirect('/'); }
         
         $query = new DataQuery;
         $data['movie'] = $query->getWhere('movies', ['MovieID' => $id]);
-        $data['schedules'] = $query->getSchedulesByMovie($id);
+        
+        // 1. Get all available dates for this movie
+        $data['dates'] = $query->getMovieDate($id);
+        
+        // 2. Determine selected date (from URL, or default to the first date)
+        $selectedDate = $request->input('date');
+        if (!$selectedDate && count($data['dates']) > 0) {
+            $selectedDate = $data['dates'][0]->ShowDate;
+        }
+        
+        $data['selectedDate'] = $selectedDate;
+        
+        // 3. Get schedules for that specific date
+        if ($selectedDate) {
+            $data['schedules'] = $query->getSchedulesByDate($id, $selectedDate);
+        } else {
+            $data['schedules'] = []; // Empty array if no dates exist
+        }
         
         return view('moviedetail', $data); 
     }
-
     public function selectSeats($scheduleId)
     {
         if (!session('Username')) { return redirect('/'); }
@@ -531,5 +548,40 @@ class CinemaController extends Controller
                              ->get();
 
         return view('viewticket', $data);
+    }
+
+        // Get all unique dates that have schedules for this movie
+    public function getMovieDates($movieId)
+    {
+        return DB::table('schedules')
+                 ->where('MovieID', $movieId)
+                 ->select('ShowDate')
+                 ->distinct()
+                 ->orderBy('ShowDate', 'asc')
+                 ->get();
+    }
+
+    // Get schedules for a specific movie AND a specific date
+    public function getSchedulesByDate($movieId, $date)
+    {
+        return DB::table('schedules')
+                 ->join('studios', 'schedules.StudioID', '=', 'studios.StudioID')
+                 ->where('schedules.MovieID', $movieId)
+                 ->where('schedules.ShowDate', $date)
+                 ->select('schedules.*', 'studios.StudioName')
+                 ->get();
+    }
+
+        // ================= MY TICKETS =================
+
+    public function myTickets()
+    {
+        if (!session('Username')) { return redirect('/'); }
+        
+        $query = new DataQuery;
+        // Fetch orders for the logged-in user
+        $data['orders'] = $query->getUserOrders(session('UserID'));
+        
+        return view('mytickets', $data);
     }
 }

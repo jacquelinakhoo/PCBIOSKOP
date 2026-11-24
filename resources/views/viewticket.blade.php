@@ -23,7 +23,8 @@
               
               <div class="row text-start mb-3">
                   <div class="col-6">
-                      <strong>Order ID:</strong> #<?= $order->OrderID ?><br>
+                      <!-- HIDING THE DB ID: Using the TicketCode as the Order Reference -->
+                      <strong>Order Ref:</strong> <?= $order->TicketCode ?><br>
                       <strong>Status:</strong> <span class="badge bg-warning text-dark"><?= $order->OrderStatus ?></span>
                   </div>
                   <div class="col-6 text-end">
@@ -34,7 +35,8 @@
 
               <div class="mb-4">
                   <strong>Seats:</strong><br>
-                  <?php foreach($details as $d) { ?>
+                  <!-- Using $no here is fine because it's just numbering the seats visually (1, 2, 3) instead of showing SeatsID -->
+                  <?php $no = 1; foreach($details as $d) { ?>
                       <span class="badge bg-primary fs-6 mb-1">Seat <?= $d->SeatNumber ?></span>
                   <?php } ?>
               </div>

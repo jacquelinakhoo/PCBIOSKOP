@@ -53,3 +53,6 @@ Route::get('/movie/detail/{id}', [CinemaController::class, 'movieDetail']);
 Route::get('/movie/select-seats/{scheduleId}', [CinemaController::class, 'selectSeats']);
 Route::post('/movie/book', [CinemaController::class, 'processBooking']);
 Route::get('/movie/ticket/{orderId}', [CinemaController::class, 'viewTicket']);
+
+// My Tickets (For all roles)
+Route::get('/my-tickets', [CinemaController::class, 'myTickets']);
